@@ -95,7 +95,150 @@ class MoreInfo extends React.Component {
         }
     }
 
+    getInfoFromTiles(tiles) {
+        return tiles.reduce((acc, tile) => {
+            if (tile in tileData.all) {
+                for (let planetIndex in tileData.all[tile].planets) {
+                    let planet = tileData.all[tile].planets[planetIndex];
+                    // console.log(planet)
+                    acc.planets += 1;
+                    acc.resources.total += planet.resources;
+                    acc.influence.total += planet.influence;
+                    if (planet.resources > planet.influence) {
+                        acc.resources.optimal += planet.resources;
+                    } else if (planet.influence > planet.resources) {
+                        acc.influence.optimal += planet.influence;
+                    } else {
+                        acc.resources.optimal += planet.resources / 2;
+                        acc.influence.optimal += planet.influence / 2;
+                    }
+                    acc.specialties[planet.specialty] += 1;
+                    acc.traits[planet.trait] += 1;
+                }
+                for (let wormholeIndex in tileData.all[tile].wormhole){
+                    if (!(tileData.all[tile].wormhole[wormholeIndex] in acc.wormholes)){
+                        acc.wormholes.push(tileData.all[tile].wormhole[wormholeIndex])
+                    }
+                }
+            }
+
+            return acc;
+        }, {
+            planets: 0,
+            resources: {
+                optimal: 0,
+                total: 0
+            },
+            influence: {
+                optimal: 0,
+                total: 0
+            },
+            specialties: {
+                "biotic": 0,
+                "warfare": 0,
+                "propulsion": 0,
+                "cybernetic": 0
+            },
+            traits: {
+                "cultural": 0,
+                "industrial": 0,
+                "hazardous": 0
+            },
+            wormholes: []
+        });
+    }
+
     render() {
+        const slices = [];
+
+        for (let i = 0; i < 6; i++) {
+            let slice = {
+                playerName: "",
+                tiles: [],
+                homeSystem: 0,
+                info: undefined
+            };
+            // Inner circle
+            slice.tiles.push(this.props.tiles[i + 1])
+            // Middle Circle
+            if (i === 0) {
+                slice.tiles.push(this.props.tiles[18])
+            } else {
+                slice.tiles.push(this.props.tiles[i * 2 + 6])
+            }
+            slice.tiles.push(this.props.tiles[i * 2 + 7])
+            slice.tiles.push(this.props.tiles[i * 2 + 8])
+            // Outer Circle
+            slice.homeSystem = this.props.tiles[i * 3 + 19]
+            if (i === 0) {
+                slice.tiles.push(this.props.tiles[36])
+            } else {
+                slice.tiles.push(this.props.tiles[i * 3 + 18])
+            }
+            slice.tiles.push(this.props.tiles[i * 3 + 20])
+
+            console.log(slice.homeSystem, slice.tiles)
+
+            slice.playerName = this.props.currentPlayerNames[i];
+            if (slice.playerName === "") {
+                slice.playerName = "P" + (i + 1);
+            }
+
+            slice.info = this.getInfoFromTiles(slice.tiles);
+
+            slices.push(
+                <tr key={"more-info-" + slice.playerName} >
+                    <th scope="row">{slice.playerName}</th>
+                    <td>{raceData.homeSystemToRaceMap[slice.homeSystem]}<br />Home Tile: {slice.homeSystem}</td>
+                    <td>{slice.info.resources.optimal}/{slice.info.resources.total}</td>
+                    <td>{slice.info.influence.optimal}/{slice.info.influence.total}</td>
+                    <td>
+                        <span className={"d-flex"}>
+                            {[...Array(slice.info.traits.cultural)].map((e, i) => <img key={slice.playerName + "-cultural-" + i} className={"icon"} src={traitCultural} alt={"C"}/>)}
+                            {[...Array(slice.info.traits.hazardous)].map((e, i) => <img key={slice.playerName + "-hazardous-" + i} className={"icon"} src={traitHazardous} alt={"H"}/>)}
+                            {[...Array(slice.info.traits.industrial)].map((e, i) => <img key={slice.playerName + "-industrial-" + i} className={"icon"} src={traitIndustrial} alt={"I"}/>)}
+                            {[...Array(slice.info.wormholes)].map((e, i) => <p className="icon" key={`${slice.playerName}-wormhole-${i}`}>{WORMHOLE_SYMBOLS[e]}</p>)}
+                        </span>
+                    </td>
+                    <td>
+                        <span className={"d-flex"}>
+                            {[...Array(slice.info.specialties.biotic)].map((e, i) => <img key={slice.playerName + "-biotic-" + i} className={"icon"} src={specialtyBiotic} alt={"B"}/>)}
+                            {[...Array(slice.info.specialties.warfare)].map((e, i) => <img key={slice.playerName + "-warfare-" + i} className={"icon"} src={specialtyWarfare} alt={"W"}/>)}
+                            {[...Array(slice.info.specialties.propulsion)].map((e, i) => <img key={slice.playerName + "-propulsion-" + i} className={"icon"} src={specialtyPropulsion} alt={"P"}/>)}
+                            {[...Array(slice.info.specialties.cybernetic)].map((e, i) => <img key={slice.playerName + "-cybernetic-" + i} className={"icon"} src={specialtyCybernetic} alt={"C"}/>)}
+                        </span>
+                    </td>
+                </tr>
+            );
+        }
+
+        return (
+            <div id="moreInfoContainer" className={this.props.visible ? "" : "d-none"}>
+                <div className="title">
+                    <h4 id="infoTitle" className="text-center">Assets Per Slice</h4>
+                </div>
+                <div id="moreInfo" className="">
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Race</th>
+                                <th scope="col"><img className={"icon"} src={resource} alt={"Res."}/></th>
+                                <th scope="col"><img className={"icon"} src={influence} alt={"Inf."}/></th>
+                                <th scope="col"><img className={"icon"} src={planet} alt={"Planets"}/></th>
+                                <th scope="col"><img className={"icon"} src={specialtyWarfare} alt={"Tech"}/></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {slices}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    }
+
+    render2() {
         let moreInfoByPlayer = [];
 
         for (let tileNumber in this.props.tiles) {
@@ -159,5 +302,7 @@ class MoreInfo extends React.Component {
             </div>
         );
     }
+
+    
 }
 export default MoreInfo;
