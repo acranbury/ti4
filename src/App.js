@@ -518,7 +518,7 @@ class App extends React.Component {
         // Guarantee that justTriggeredTiles is set
         justTriggeredTiles = justTriggeredTiles === undefined ? false : justTriggeredTiles;
 
-        let optionsSize = this.state.moreInfoVisible ? "0px" : "400px";
+        let optionsSize = this.state.moreInfoVisible ? "0px" : "520px";
         document.documentElement.style.setProperty('--more-info-width', optionsSize);
         
         // Show the player names
@@ -539,7 +539,7 @@ class App extends React.Component {
         }, () => {
             // Hide the extra tiles if the user just pressed the show more info button
             if (this.state.extraTilesVisible && !justTriggeredTiles) {
-                this.toggleExtraTiles(event, true);
+                //this.toggleExtraTiles(event, true);
             }
         });
     }
@@ -562,7 +562,7 @@ class App extends React.Component {
             extraTilesVisible: !this.state.extraTilesVisible,
         }, () => {
             if (this.state.moreInfoVisible && !justTriggeredInfo) {
-                this.toggleMoreInfo(event, true);
+                //this.toggleMoreInfo(event, true);
             }
         });
     }

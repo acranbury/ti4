@@ -113,9 +113,9 @@ h1, h2, h3, h4, h5 {
 #moreInfoContainer {
     color: black;
     position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
+    bottom: 0;
+    right: 0;
+    height: 50%;
     width: var(--more-info-width);
     overflow: auto;
     background-color: var(--tertiary-color);
@@ -165,7 +165,8 @@ h1, h2, h3, h4, h5 {
 #mainContent {
     position: fixed;
     top: 0;
-    right: var(--options-width);
+    right: var(--options-width) + var(--more-info-width);
+    left: var(--extra-tiles-width);
     width: calc(100% - var(--options-width) - var(--extra-tiles-width) - var(--more-info-width));
     height: 100%;
     text-align: center;
